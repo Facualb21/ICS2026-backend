@@ -1,38 +1,46 @@
-name: Desplegar API en Azure
+name: Build and Deploy to Azure App Service (Publish Profile)
 
 on:
   push:
-    branches:
-      - development
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_USERNAME: facundo21
+  IMAGE_NAME: ics-backend
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Descargar el código
+      - name: 1. Obtener el código
         uses: actions/checkout@v4
 
-      - name: Convertir nombre del repo a minúsculas
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
-
-      - name: Iniciar sesión en GitHub Container Registry
+      - name: 2. Iniciar sesión en Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Construir y subir imagen Docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ env.REPO }}:latest
+      - name: 3. Construir la imagen Docker (.NET 8)
+        run: |
+          docker build \
+            -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest \
+            -f Dockerfile .
 
-      - name: Desplegar en Azure Web App
+      - name: 4. Subir la imagen a Docker Hub
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: 5. Desplegar el contenedor en Azure App Service
+        if: github.event_name != 'pull_request'
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'ics-2026docker'
+          app-name: ${{ secrets.APP_SERVICE_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: 'ghcr.io/${{ env.REPO }}:latest'
+          images: ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
