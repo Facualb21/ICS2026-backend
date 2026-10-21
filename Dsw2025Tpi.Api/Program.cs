@@ -80,7 +80,7 @@ public class Program
             options.UseSqlServer(builder.Configuration.GetConnectionString("Dsw2025TpiEntities"));
         });
 
-        // --- AQUÍ ESTÁ EL CAMBIO ---
+        // --- AQUï¿½ ESTï¿½ EL CAMBIO ---
         builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
         {
             options.Password = new PasswordOptions
