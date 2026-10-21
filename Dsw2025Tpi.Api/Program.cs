@@ -234,14 +234,15 @@ public class Program
                 Console.WriteLine(ex.ToString());
             }
         }
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "ICS2026 API v1");
+            c.DocumentTitle = "ICS2026 API";
+        });
 
         app.UseHttpsRedirection();
+
         app.UseCors("AllowFrontend");
 
         app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -250,7 +251,6 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
-
         app.MapHealthChecks("/healthcheck");
 
         app.Run();
