@@ -112,9 +112,9 @@ namespace Dsw2025Tpi.Application.Services
 
                 
                 (string.IsNullOrEmpty(filter.Search)
-                    || (p.Name != null && p.Name.Contains(filter.Search))
-                    || (p.InternalCode != null && p.InternalCode.Contains(filter.Search))
-                    || (p.Sku != null && p.Sku.Contains(filter.Search))
+                    || (p.Name != null && p.Name.ToLower().Contains(filter.Search.ToLower()))
+                    || (p.InternalCode != null && p.InternalCode.ToLower().Contains(filter.Search.ToLower()))
+                    || (p.Sku != null && p.Sku.ToLower().Contains(filter.Search.ToLower()))
                 )
             );
 
