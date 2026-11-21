@@ -68,7 +68,10 @@ namespace Dsw2025Tpi.UnitTests.Services
 
             result.Should().NotBeNull();
             result.ClientName.Should().Be("Juan Perez");
-            result.TotalAmount.Should().Be(150.0m);
+            //result.TotalAmount.Should().Be(150.0m);
+
+            //Evidencia de bloqueo — CA2
+            result.TotalAmount.Should().Be(999.0m);
 
             product.StockQuantity.Should().Be(7);
 
